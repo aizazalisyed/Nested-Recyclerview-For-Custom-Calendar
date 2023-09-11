@@ -1,41 +1,69 @@
 package com.java.nestedrecyclerviewforcustomcalendar
 
+
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.annotation.RequiresApi
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import com.java.nestedrecyclerviewforcustomcalendar.MonthAdapter
+import com.java.nestedrecyclerviewforcustomcalendar.MonthData
 import com.java.nestedrecyclerviewforcustomcalendar.databinding.ActivityMainBinding
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
-
 @RequiresApi(Build.VERSION_CODES.O)
-class MainActivity : AppCompatActivity(), CalendarAdapter.OnItemListener {
+class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var selectedDate: LocalDate
+    lateinit var monthDataList : ArrayList<MonthData>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        monthDataList = ArrayList()
         selectedDate = LocalDate.now()
+
+        // Add 5 previous months
+        for (i in 1..5) {
+            selectedDate = selectedDate.minusMonths(1)
+            val daysInMonth = daysInMonthArray(selectedDate)
+            val monthData = MonthData(
+                monthYearFromDate(selectedDate),
+                daysInMonth
+            )
+            monthDataList.add(monthData)
+        }
+
+        // Add the current month
+        val daysInMonth = daysInMonthArray(LocalDate.now())
+        val currentMonthData = MonthData(
+            monthYearFromDate(LocalDate.now()),
+            daysInMonth
+        )
+        monthDataList.add(currentMonthData)
+
+        // Add 5 next months
+        selectedDate = LocalDate.now()
+        for (i in 1..5) {
+            selectedDate = selectedDate.plusMonths(1)
+            val daysInMonth = daysInMonthArray(selectedDate)
+            val monthData = MonthData(
+                monthYearFromDate(selectedDate),
+                daysInMonth
+            )
+            monthDataList.add(monthData)
+        }
+
         setMonthView()
     }
 
-
     private fun setMonthView() {
-        binding.monthYearTV.text = monthYearFromDate(selectedDate)
-        val daysInMonth = daysInMonthArray(selectedDate)
-
-        val calendarAdapter = CalendarAdapter(daysInMonth, this)
-        val layoutManager = GridLayoutManager(applicationContext, 7)
-        binding.calendarRecyclerView.layoutManager = layoutManager
-        binding.calendarRecyclerView.adapter = calendarAdapter
+        val monthAdapter = MonthAdapter(monthDataList, applicationContext)
+        binding.calendarRecyclerView.adapter = monthAdapter
     }
 
     private fun daysInMonthArray(date: LocalDate): ArrayList<String> {
@@ -64,18 +92,11 @@ class MainActivity : AppCompatActivity(), CalendarAdapter.OnItemListener {
 
     fun previousMonthAction(view: View) {
         selectedDate = selectedDate.minusMonths(1)
-        setMonthView()
+        recreate()
     }
 
     fun nextMonthAction(view: View) {
         selectedDate = selectedDate.plusMonths(1)
-        setMonthView()
-    }
-
-    override fun onItemClick(position: Int, dayText: String) {
-        if (dayText != "") {
-            val message = "Selected Date $dayText ${monthYearFromDate(selectedDate)}"
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-        }
+        recreate()
     }
 }

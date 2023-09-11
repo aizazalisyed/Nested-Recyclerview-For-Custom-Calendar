@@ -8,22 +8,13 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.java.nestedrecyclerviewforcustomcalendar.databinding.CalendarCellBinding
 
-class CalendarAdapter(private val daysOfMonth: ArrayList<String>, private val onItemListener: OnItemListener) :
+class CalendarAdapter(private val daysOfMonth: ArrayList<String>) :
     RecyclerView.Adapter<CalendarAdapter.ViewHolder>() {
 
     inner class ViewHolder(private val binding: CalendarCellBinding) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(day: String) {
             binding.cellDayText.text = day
-        }
-
-        init {
-            binding.root.setOnClickListener {
-                val position = adapterPosition
-                if (position != RecyclerView.NO_POSITION) {
-                    onItemListener.onItemClick(position, daysOfMonth[position])
-                }
-            }
         }
     }
 
@@ -42,9 +33,5 @@ class CalendarAdapter(private val daysOfMonth: ArrayList<String>, private val on
 
     override fun getItemCount(): Int {
         return daysOfMonth.size
-    }
-
-    interface OnItemListener {
-        fun onItemClick(position: Int, dayText: String)
     }
 }
