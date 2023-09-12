@@ -28,6 +28,7 @@ class MainActivity : AppCompatActivity() {
         selectedDate = LocalDate.now()
 
         // Add 5 previous months
+        val previousMonthsList = ArrayList<MonthData>()
         for (i in 1..5) {
             selectedDate = selectedDate.minusMonths(1)
             val daysInMonth = daysInMonthArray(selectedDate)
@@ -35,8 +36,12 @@ class MainActivity : AppCompatActivity() {
                 monthYearFromDate(selectedDate),
                 daysInMonth
             )
-            monthDataList.add(monthData)
+            previousMonthsList.add(monthData)
         }
+        // Reverse the previous months list and append it to the end of the main list
+        previousMonthsList.reverse()
+        monthDataList.addAll(previousMonthsList)
+
 
         // Add the current month
         val daysInMonth = daysInMonthArray(LocalDate.now())
@@ -64,6 +69,15 @@ class MainActivity : AppCompatActivity() {
     private fun setMonthView() {
         val monthAdapter = MonthAdapter(monthDataList, applicationContext)
         binding.calendarRecyclerView.adapter = monthAdapter
+
+        // Find the position of the current month data in the list
+        val currentPosition = monthDataList.indexOfFirst { it.monthYearNames == monthYearFromDate(LocalDate.now()) }
+
+        // Scroll the RecyclerView to the position of the current month
+        if (currentPosition != -1) {
+            binding.calendarRecyclerView.scrollToPosition(currentPosition)
+        }
+
     }
 
     private fun daysInMonthArray(date: LocalDate): ArrayList<String> {
